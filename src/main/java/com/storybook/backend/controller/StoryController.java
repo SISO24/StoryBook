@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/stories")
@@ -99,6 +100,45 @@ public class StoryController {
             storyService.deleteBlock(
                 userDetails.getUsername(), storyId, blockId));
     }
+
+@PostMapping("/{storyId}/share")
+public ResponseEntity<Map<String, String>> shareStory(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @PathVariable UUID storyId,
+        @Valid @RequestBody ShareStoryRequest request) {
+    storyService.shareStory(userDetails.getUsername(), storyId, request);
+    return ResponseEntity.ok(Map.of("message", "Story shared successfully"));
+}
+
+@GetMapping("/shared-with-me")
+public ResponseEntity<List<ShareStoryResponse>> getSharedWithMe(
+        @AuthenticationPrincipal UserDetails userDetails) {
+    return ResponseEntity.ok(
+        storyService.getStoriesSharedWithMe(userDetails.getUsername())
+    );
+}
+
+@GetMapping("/shared/{storyId}")
+public ResponseEntity<StoryResponse> getSharedStory(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @PathVariable UUID storyId) {
+    return ResponseEntity.ok(
+        storyService.getSharedStory(userDetails.getUsername(), storyId)
+    );
+}
+
+@DeleteMapping("/{storyId}/share/{shareId}")
+public ResponseEntity<Map<String, String>> revokeShare(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @PathVariable UUID storyId,
+        @PathVariable UUID shareId) {
+    storyService.revokeShare(userDetails.getUsername(), storyId, shareId);
+    return ResponseEntity.ok(Map.of("message", "Access revoked"));
+}
+
+
+
+
 
 
 }

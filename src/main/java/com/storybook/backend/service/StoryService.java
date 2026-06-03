@@ -8,6 +8,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import com.storybook.backend.repo.StoryShareRepo;
+
 import java.util.UUID;
 import java.util.List;
 
@@ -19,6 +21,7 @@ public class StoryService {
     private final StoryRepo storyRepo;
     private final StoryBlockRepo storyBlockRepo;
     private final UserRepo userRepo;
+    private final StoryShareRepo storyShareRepo;
 
     @Transactional
     public StoryResponse createStory(String email, CreateStoryRequest request){
@@ -134,5 +137,82 @@ return StoryResponse.from(story);
         storyBlockRepo.delete(block);
         return StoryResponse.from(story);
     }
+
+@Transactional
+public void shareStory(String ownerEmail, UUID storyId, ShareStoryRequest request){
+
+         UserEntity owner = userRepo.findByEmail(ownerEmail)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+    StoryEntity story = storyRepo.findByIdAndUser(storyId, owner)
+            .orElseThrow(() -> new RuntimeException("Story not found"));
+
+   if(owner.getEmail().equals(request.email())){
+        throw new RuntimeException("You cannot share a story with yourself");
+   }
+
+    UserEntity targetUser = userRepo.findByEmail(request.email())
+            .orElseThrow(() -> new RuntimeException(
+                "No user found with email: " + request.email()));
+
+     if (storyShareRepo.existsByStoryAndSharedWith(story, targetUser)) {
+        throw new RuntimeException("Story already shared with this user");
+    }
+   
+     StoryShareEntity share = StoryShareEntity.builder()
+            .story(story)
+            .sharedBy(owner)
+            .sharedWith(targetUser)
+            .build();
+
+    storyShareRepo.save(share);
+
+}
+
+public List<ShareStoryResponse> getStoriesSharedWithMe(String email) {
+    UserEntity user = userRepo.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+    return storyShareRepo.findBySharedWith(user)
+            .stream()
+            .map(ShareStoryResponse::from)
+            .toList();
+}
+
+
+public StoryResponse getSharedStory(String email, UUID storyId) {
+    UserEntity user = userRepo.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+    StoryEntity story = storyRepo.findById(storyId)
+            .orElseThrow(() -> new RuntimeException("Story not found"));
+
+    // Check user has access — either owner or shared with
+    boolean isOwner = story.getUser().getId().equals(user.getId());
+    boolean isSharedWith = storyShareRepo
+            .existsByStoryAndSharedWith(story, user);
+
+    if (!isOwner && !isSharedWith) {
+        throw new RuntimeException("Access denied");
+    }
+
+    return StoryResponse.from(story);
+}
+
+@Transactional
+public void revokeShare(String ownerEmail, UUID storyId, UUID shareId) {
+    UserEntity owner = userRepo.findByEmail(ownerEmail)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+    StoryEntity story = storyRepo.findByIdAndUser(storyId, owner)
+            .orElseThrow(() -> new RuntimeException("Story not found"));
+
+    StoryShareEntity share = storyShareRepo.findById(shareId)
+            .orElseThrow(() -> new RuntimeException("Share not found"));
+
+    storyShareRepo.delete(share);
+}
+
+
     
 }
