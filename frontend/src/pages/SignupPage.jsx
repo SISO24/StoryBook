@@ -1,0 +1,152 @@
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
+
+export default function SignupPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const { signup, loading } = useAuth();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
+    await signup(email, password);
+  };
+
+  return (
+    <>
+      <div className="h-screen w-full flex">
+        <div className="bg-[#111111] w-1/2 h-full flex-column ">
+          {" "}
+          {/* starting dic of left side */}
+          <div className="mt-2 ml-2 pt-2 pl-3 w-45 h-10 flex">
+            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-lg">
+              <span className="text-black font-bold text-base">S</span>
+            </div>
+            <span className="text-white font-semibold text-xl tracking-tight ml-2 mt-2">
+              StoryBook
+            </span>
+          </div>
+          <div className="space-y-2 mt-20 ml-5">
+            <p className="text-[#e8e8e8] text-5xl font-light leading-relaxed tracking-tight">
+              Where every story
+            </p>
+            <p className="text-[#e8e8e8] text-5xl font-light leading-relaxed tracking-tight">
+              finds its
+            </p>
+            <p className="text-white text-5xl font-bold leading-relaxed tracking-tight">
+              voice.
+            </p>
+
+            <p className="text-[#a8a8a8] text-lg leading-relaxed max-w-xl font-light mt-10">
+              Write, organize, and share your stories with the world. A
+              workspace built for writers who think in chapters.
+            </p>
+          </div>
+        </div>{" "}
+        {/* ending div of left side */}
+        {/* form section*/}
+        <div className="bg-[#191919] w-1/2 h-full flex flex-col justify-center items-center px-6 sm:px-8 py-12">
+          {/* The form wrapper: max-w-sm controls the width, w-full ensures it stretches beautifully up to that max width */}
+          <div className="w-full max-w-sm space-y-6">
+            {/* Header */}
+            <div className="space-y-4">
+              <h1 className="text-white text-4xl font-bold tracking-tight mt-4">
+                Welcome!!
+              </h1>
+              <p className="text-[#8e8e8e] text-lg font-light">
+                Sign up to continue your story
+              </p>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-8">
+              <div className="space-y-3">
+                <label className="text-[#8a8a8a] text-xs font-semibold uppercase tracking-wider block">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  required
+                  className="w-full bg-[#1c1c1c] border border-[#2d2d2d] rounded-2xl px-5 py-4 text-[#e8e8e8] text-base placeholder-[#4a4a4a] focus:outline-none focus:border-[#444] transition-all duration-200"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-[#8a8a8a] text-xs font-semibold uppercase tracking-wider block">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  className="w-full bg-[#1c1c1c] border border-[#2d2d2d] rounded-2xl px-5 py-4 text-[#e8e8e8] text-base placeholder-[#4a4a4a] focus:outline-none focus:border-[#444] transition-all duration-200"
+                />
+              </div>
+              <div>
+                <label className="block text-[#9b9b9b] text-xs font-semibold uppercase tracking-widest mb-2">
+                  Confirm Password
+                </label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  className="w-full bg-[#2d2d2d] border border-[#3d3d3d] rounded-lg px-4 py-3.5 text-[#e8e8e8] text-sm placeholder-[#4d4d4d] focus:outline-none focus:border-[#606060] transition-all duration-200"
+                />
+              </div>
+
+              {error && (
+                <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3">
+                  <p className="text-red-400 text-sm">{error}</p>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-white hover:bg-[#f0f0f0] text-black font-semibold py-4 rounded-2xl text-base transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed mt-4 shadow-md"
+              >
+                {loading ? "Signing up..." : "Continue"}
+              </button>
+            </form>
+
+            {/* Divider */}
+            <div className="flex items-center gap-4 pt-2">
+              <div className="flex-1 h-px bg-[#222222]" />
+              <span className="text-[#555] text-xs font-light">or</span>
+              <div className="flex-1 h-px bg-[#222222]" />
+            </div>
+
+            {/* Signup link */}
+            <p className="text-center text-[#a8a8a8] text-base font-light">
+              Already have an account?{" "}
+              <Link
+                to="/login"
+                className="text-white hover:text-[#e8e8e8] font-semibold underline underline-offset-4 transition-colors duration-200"
+              >
+                Login
+              </Link>
+            </p>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
