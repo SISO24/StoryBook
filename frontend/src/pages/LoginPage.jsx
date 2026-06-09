@@ -17,7 +17,7 @@ export default function LoginPage() {
       <div className=" w-full flex flex-col  md:flex-row">
         <div className=" md:flex bg-[#111111]  md:flex bg-[#191919] md:w-2/5 lg:w-1/2  flex-col ">
           {" "}
-          {/* starting dic of left side */}
+          {/* starting div of left side */}
           <div className="mt-4 ml-4 flex items-center">
             <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-lg">
               <span className="text-black font-bold text-base">S</span>
@@ -46,7 +46,6 @@ export default function LoginPage() {
         {/* ending div of left side */}
         {/* form section*/}
         <div className="bg-[#191919] w-full md:w-3/5 lg:w-1/2 min-h-screen flex flex-col justify-start md:justify-center items-center px-6 sm:px-8 pt-20 pb-12">
-          {/* The form wrapper: max-w-sm controls the width, w-full ensures it stretches beautifully up to that max width */}
           <div className="w-full max-w-md space-y-10">
             {/* Header */}
             <div className="space-y-4">

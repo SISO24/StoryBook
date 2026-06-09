@@ -52,7 +52,6 @@ public class AuthService {
 
        @Transactional
     public AuthResponse login(LoginRequest request) {
-        // This throws BadCredentialsException if wrong — Spring handles it
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
                 request.email(),
