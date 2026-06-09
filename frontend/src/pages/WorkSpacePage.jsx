@@ -31,7 +31,6 @@ export default function WorkspacePage() {
   const user = useAuthStore((state) => state.user);
 
   const [savingStatus, setSavingStatus] = useState(false);
-  // We keep the saveTitle and saveBlock references from your hook but call them manually
   const { saveTitle, saveBlock } = useAutoSave(setSavingStatus);
 
   const [localTitle, setLocalTitle] = useState("");
@@ -40,8 +39,6 @@ export default function WorkspacePage() {
   const editorRef = useRef(null);
   const fileInputRef = useRef(null);
   const titleInputRef = useRef(null);
-
-  // NEW INTERACTIVE STATE TOGGLES
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [isEditingContent, setIsEditingContent] = useState(false);
 
@@ -80,7 +77,6 @@ export default function WorkspacePage() {
     createStory("Untitled Story");
   };
 
-  // Helper to drop the flashing cursor right at the final character index position
   const focusElementAtEnd = (element) => {
     if (!element) return;
     element.focus();
@@ -96,19 +92,16 @@ export default function WorkspacePage() {
     }
   };
 
-  // NEW MANUAL BUTTON SWITCH CLICKS (No more autosave typing triggers)
   const handleTitleButtonClick = () => {
     if (isReadOnly) return;
 
     if (!isEditingTitle) {
-      // Step 1: Turn mode to editing and focus cursor
       setIsEditingTitle(true);
       setTimeout(() => focusElementAtEnd(titleInputRef.current), 50);
     } else {
-      // Step 2: User clicked button again -> Run manual PUT API save call
       if (id && id !== "undefined") {
         setSavingStatus(true);
-        saveTitle(id, localTitle); // Fires the manual network call inside your hook immediately
+        saveTitle(id, localTitle);
       }
       setIsEditingTitle(false);
     }
@@ -118,11 +111,9 @@ export default function WorkspacePage() {
     if (isReadOnly) return;
 
     if (!isEditingContent) {
-      // Step 1: Turn mode to editing and focus cursor
       setIsEditingContent(true);
       setTimeout(() => focusElementAtEnd(editorRef.current), 50);
     } else {
-      // Step 2: User clicked button again -> Run manual PUT API save call
       if (id && id !== "undefined" && editorRef.current) {
         setSavingStatus(true);
         const currentHtmlValue = editorRef.current.innerHTML;
@@ -130,9 +121,8 @@ export default function WorkspacePage() {
           encodeHtmlToMarkdownTokens(currentHtmlValue);
 
         if (story?.blocks && story.blocks.length > 0) {
-          saveBlock(id, story.blocks[0].id, encodedMarkdownText); // Fires manual text block PUT call
+          saveBlock(id, story.blocks[0].id, encodedMarkdownText);
         } else {
-          // If it's a completely empty story body, spin up the initial block index
           await addBlockService(id, "TEXT", encodedMarkdownText);
           await queryClient.invalidateQueries({ queryKey: ["story", id] });
           setSavingStatus(false);
@@ -195,9 +185,6 @@ export default function WorkspacePage() {
 
     return lines.length === 0 ? " " : lines.join("\n");
   };
-
-  // We leave this here just to capture trailing code dependencies,
-  // but keyboard input won't fire background autosave queries anymore.
   const handleEditorInput = () => {};
 
   const handleAudioFileSelection = async (e) => {
@@ -209,7 +196,6 @@ export default function WorkspacePage() {
       const mediaUrl = await uploadAudioService(file);
 
       if (mediaUrl) {
-        // Unlock editing window temporary to append media track elements
         const originalEditableState = editorRef.current.isContentEditable;
         editorRef.current.contentEditable = "true";
         editorRef.current.focus();
@@ -256,10 +242,8 @@ export default function WorkspacePage() {
         selection.removeAllRanges();
         selection.addRange(range);
 
-        // Revert design canvas restriction filters back to normal configurations
         editorRef.current.contentEditable = originalEditableState;
 
-        // Auto-save changes straight out-of-band to update audio structures in DB
         const currentHtmlValue = editorRef.current.innerHTML;
         const encodedMarkdownText =
           encodeHtmlToMarkdownTokens(currentHtmlValue);
@@ -272,7 +256,7 @@ export default function WorkspacePage() {
       console.error("Audio block injection failed:", err);
     } finally {
       setSavingStatus(false);
-      e.target.value = ""; // Flush memory streams
+      e.target.value = "";
     }
   };
 
@@ -291,7 +275,6 @@ export default function WorkspacePage() {
         className="hidden"
       />
 
-      {/* RESPONSIVE SIDEBAR PANEL */}
       <aside
         className={`w-full md:w-[260px] h-full bg-[#111111] flex flex-col border-r border-[#222222] select-none flex-shrink-0 relative ${id ? "hidden md:flex" : "flex"}`}
       >
@@ -372,7 +355,8 @@ export default function WorkspacePage() {
                     <button
                       onClick={(e) => {
                         e.preventDefault();
-                        e.stopPropagation(); // Stops it from accidentally opening the file while deleting
+                        e.stopPropagation();
+
                         if (confirm("Delete permanently?"))
                           deleteStory(item.id);
                       }}
@@ -398,7 +382,6 @@ export default function WorkspacePage() {
               ))}
             </div>
           </div>
-          {/* RESTORED & OPTIMIZED: High contrast text rendering logic container */}
           {sharedStories?.length > 0 && (
             <div className="pt-4 border-t border-[#222]/60">
               <div className="px-2.5 mb-2 text-xs font-bold text-[#555555] uppercase tracking-wider select-none">
@@ -434,16 +417,13 @@ export default function WorkspacePage() {
                     <button
                       onClick={(e) => {
                         e.preventDefault();
-                        e.stopPropagation(); // CRITICAL: Stops the click from accidentally opening the workspace canvas
                         if (
                           confirm(
                             "Remove this shared story from your dashboard view?",
                           )
                         ) {
-                          // Calls your share-link removal bridge pipeline explicitly passing the relationship keys
                           revokeShare(item.storyId, item.shareId);
 
-                          // If the reader is currently viewing the story they just removed, kick them back to safety
                           if (item.storyId === id) {
                             navigate("/");
                           }
@@ -483,7 +463,6 @@ export default function WorkspacePage() {
         </div>
       </aside>
 
-      {/* CANVAS CONTENT VIEWER AREA */}
       <main
         className={`flex-1 h-full flex flex-col overflow-y-auto bg-[#191919] ${id ? "flex" : "hidden md:flex"}`}
       >
@@ -537,7 +516,6 @@ export default function WorkspacePage() {
           </div>
         </div>
 
-        {/* MAIN DISPLAY SCROLL SURFACE AREA */}
         <div className="w-full max-w-4xl mx-auto px-6 sm:px-16 pt-8 sm:pt-16 pb-32 space-y-8">
           {id ? (
             isLoadingStory ? (
@@ -553,7 +531,7 @@ export default function WorkspacePage() {
                     ref={titleInputRef}
                     value={localTitle}
                     onChange={(e) => setLocalTitle(e.target.value)}
-                    disabled={isReadOnly || !isEditingTitle} // Locked unless toggle mode state is active
+                    disabled={isReadOnly || !isEditingTitle}
                     placeholder="Untitled"
                     className={`w-full bg-transparent border-none text-white text-2xl sm:text-4xl font-bold tracking-tight outline-none placeholder-[#2a2a2a] focus:ring-0 p-0 
     antialiased subpixel-antialiased transform-gpu [transform:translateZ(0)] select-text
@@ -561,7 +539,6 @@ export default function WorkspacePage() {
     ${!isEditingTitle ? "cursor-default" : "border-b border-[#333] focus:border-white"}`}
                   />
 
-                  {/* DYNAMIC TOGGLE BUTTON FOR MANUAL TITLE UPDATE */}
                   {!isReadOnly && (
                     <div className="sticky top-4 z-20 flex-shrink-0">
                       <button
@@ -599,7 +576,7 @@ export default function WorkspacePage() {
                 <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 items-start relative">
                   <div
                     ref={editorRef}
-                    contentEditable={!isReadOnly && isEditingContent} // Locked unless toggle mode state is active
+                    contentEditable={!isReadOnly && isEditingContent}
                     onInput={handleEditorInput}
                     data-placeholder={
                       isReadOnly
@@ -609,7 +586,6 @@ export default function WorkspacePage() {
                     className={`w-full min-h-[500px] bg-transparent outline-none text-[#dcdcdc] text-sm sm:text-base font-light leading-loose tracking-wide font-sans focus:ring-0 carets-white relative before:content-[attr(data-placeholder)] before:text-[#3a3a3a] before:absolute before:inset-0 before:pointer-events-none empty:before:block before:hidden [&_div:empty]:min-h-[1.5rem] ${!isEditingContent ? "cursor-default opacity-80" : "cursor-text opacity-100"}`}
                   />
 
-                  {/* DYNAMIC TOGGLE BUTTON FOR MANUAL CONTENT BODY UPDATE */}
                   {!isReadOnly && (
                     <div className="sticky top-4 z-20 flex-shrink-0">
                       <button
