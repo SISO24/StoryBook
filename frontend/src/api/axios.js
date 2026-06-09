@@ -22,28 +22,38 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const original = error.config;
+    const originalRequest = error.config;
 
-    if (error.response?.status === 403 && !original._retry) {
-      original._retry = true;
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
 
       try {
         const refreshToken = useAuthStore.getState().refreshToken;
+
         const response = await axios.post("/api/auth/refresh", {
           refreshToken,
         });
+
         const newAccessToken = response.data.accessToken;
 
         useAuthStore.getState().setAccessToken(newAccessToken);
-        original.headers.Authorization = `Bearer ${newAccessToken}`;
-        return api(original);
+
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+
+        return api(originalRequest);
       } catch (refreshError) {
         useAuthStore.getState().logout();
         window.location.href = "/login";
         return Promise.reject(refreshError);
       }
     }
+    if (error.response?.status === 403) {
+      console.warn(
+        "Security Constraint Violation: Access Denied to resource parameters.",
+      );
+    }
     return Promise.reject(error);
   },
 );
+
 export default api;

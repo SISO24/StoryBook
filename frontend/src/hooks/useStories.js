@@ -6,6 +6,7 @@ import {
   updateStoryService,
   deleteStoryService,
   getSharedStoriesService,
+  revokeShareService,
 } from "../service/StoryService";
 
 import toast from "react-hot-toast";
@@ -45,12 +46,24 @@ export const useStories = () => {
     onError: () => toast.error("Failed to delete story"),
   });
 
+  const revokeShareMutation = useMutation({
+    mutationFn: ({ storyId, shareId }) => revokeShareService(storyId, shareId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["shared-stories"] });
+      toast.success("Removed from your workspace view");
+      navigate("/");
+    },
+    onError: () => toast.error("Failed to remove shared connection"),
+  });
+
   return {
     stories,
     sharedStories,
     isLoading,
     createStory: (title) => createStory.mutate(title),
     deleteStory: (id) => deleteStory.mutate(id),
+    revokeShare: (storyId, shareId) =>
+      revokeShareMutation.mutate({ storyId, shareId }),
     isCreating: createStory.isPending,
   };
 };

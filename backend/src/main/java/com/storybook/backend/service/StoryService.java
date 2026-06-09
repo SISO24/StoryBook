@@ -44,13 +44,26 @@ public class StoryService {
         .toList();
     }
 
-    public StoryResponse getStory(String email, UUID storyId){
-              UserEntity user = userRepo.findByEmail(email)
+
+public StoryResponse getStory(String email, UUID storyId) {
+        // 1. Fetch the user making the request
+        UserEntity user = userRepo.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        StoryEntity story = storyRepo.findByIdAndUser(storyId, user)
+        // 2. Look for the story by its ID alone (bypassing the strict owner restriction initially)
+        StoryEntity story = storyRepo.findById(storyId)
                 .orElseThrow(() -> new RuntimeException("Story not found"));
 
+        // 3. Security Boundary Analysis: Determine if the user has a valid reason to see this record
+        boolean isOwner = story.getUser().getId().equals(user.getId());
+        boolean isSharedWithMe = storyShareRepo.existsByStoryAndSharedWith(story, user);
+
+        // 4. Secure Gateway Lockout: Reject if they aren't the owner AND it hasn't been shared with them
+        if (!isOwner && !isSharedWithMe) {
+            throw new RuntimeException("Access denied: You do not have permission to view this workspace");
+        }
+
+        // Return the clean mapping conversion structure safely
         return StoryResponse.from(story);
     }
 
@@ -199,20 +212,30 @@ public StoryResponse getSharedStory(String email, UUID storyId) {
     return StoryResponse.from(story);
 }
 
+
 @Transactional
-public void revokeShare(String ownerEmail, UUID storyId, UUID shareId) {
-    UserEntity owner = userRepo.findByEmail(ownerEmail)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+    public void revokeShare(String usernameEmail, UUID storyId, UUID shareId) {
+        UserEntity executingUser = userRepo.findByEmail(usernameEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-    StoryEntity story = storyRepo.findByIdAndUser(storyId, owner)
-            .orElseThrow(() -> new RuntimeException("Story not found"));
+        StoryShareEntity share = storyShareRepo.findById(shareId)
+                .orElseThrow(() -> new RuntimeException("Share mapping index not found"));
 
-    StoryShareEntity share = storyShareRepo.findById(shareId)
-            .orElseThrow(() -> new RuntimeException("Share not found"));
+        // Confirm the share record matches the story ID in the URL path
+        if (!share.getStory().getId().equals(storyId)) {
+            throw new RuntimeException("Invalid resource mapping operation");
+        }
 
-    storyShareRepo.delete(share);
-}
+        // PERMISSION GATE: Allow the action if the user is the original owner OR the recipient
+        boolean isOwner = share.getStory().getUser().getId().equals(executingUser.getId());
+        boolean isRecipient = share.getSharedWith().getId().equals(executingUser.getId());
 
+        if (!isOwner && !isRecipient) {
+            throw new RuntimeException("Access denied: You cannot modify this sharing connection");
+        }
+
+        storyShareRepo.delete(share);
+    }
 
     
 }

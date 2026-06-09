@@ -5,7 +5,7 @@ import SignupPage from "./pages/SignupPage";
 import EditorPage from "./pages/EditorPage";
 import WorkSpacePage from "./pages/WorkSpacePage";
 
-import "./App.css";
+// import "./App.css";
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useAuthStore();

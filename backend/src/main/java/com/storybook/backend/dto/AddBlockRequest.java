@@ -7,6 +7,6 @@ public record AddBlockRequest(
     @NotNull(message = "Block type is required")
     BlockType type,
 
-    @NotBlank(message = "Content is required")
+    @NotNull(message = "Content is required")
     String content
 ) {}
