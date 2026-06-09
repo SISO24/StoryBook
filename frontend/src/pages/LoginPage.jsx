@@ -14,11 +14,11 @@ export default function LoginPage() {
 
   return (
     <>
-      <div className="h-screen w-full flex">
-        <div className="bg-[#111111] w-1/2 h-full flex-column ">
+      <div className=" w-full flex flex-col  md:flex-row">
+        <div className=" md:flex bg-[#111111]  md:flex bg-[#191919] md:w-2/5 lg:w-1/2  flex-col ">
           {" "}
           {/* starting dic of left side */}
-          <div className="mt-2 ml-2 pt-2 pl-3 w-45 h-10 flex">
+          <div className="mt-4 ml-4 flex items-center">
             <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-lg">
               <span className="text-black font-bold text-base">S</span>
             </div>
@@ -26,18 +26,18 @@ export default function LoginPage() {
               StoryBook
             </span>
           </div>
-          <div className="space-y-2 mt-20 ml-5">
-            <p className="text-[#e8e8e8] text-5xl font-light leading-relaxed tracking-tight">
+          <div className="space-y-4 mt-16 lg:mt-24 px-6 lg:px-10">
+            <p className="text-[#e8e8e8] text-3xl lg:text-5xl font-light leading-relaxed tracking-tight">
               Where every story
             </p>
-            <p className="text-[#e8e8e8] text-5xl font-light leading-relaxed tracking-tight">
+            <p className="text-white text-3xl lg:text-5xl font-bold leading-relaxed tracking-tight">
               finds its
             </p>
             <p className="text-white text-5xl font-bold leading-relaxed tracking-tight">
               voice.
             </p>
 
-            <p className="text-[#a8a8a8] text-lg leading-relaxed max-w-xl font-light mt-10">
+            <p className="text-[#a8a8a8] text-base lg:text-lg leading-relaxed max-w-md lg:max-w-xl font-light mt-8">
               Write, organize, and share your stories with the world. A
               workspace built for writers who think in chapters.
             </p>
@@ -45,12 +45,12 @@ export default function LoginPage() {
         </div>{" "}
         {/* ending div of left side */}
         {/* form section*/}
-        <div className="bg-[#191919] w-1/2 h-full flex flex-col justify-center items-center px-6 sm:px-8 py-12">
+        <div className="bg-[#191919] w-full md:w-3/5 lg:w-1/2 min-h-screen flex flex-col justify-start md:justify-center items-center px-6 sm:px-8 pt-20 pb-12">
           {/* The form wrapper: max-w-sm controls the width, w-full ensures it stretches beautifully up to that max width */}
-          <div className="w-full max-w-sm space-y-12">
+          <div className="w-full max-w-md space-y-10">
             {/* Header */}
             <div className="space-y-4">
-              <h1 className="text-white text-4xl font-bold tracking-tight">
+              <h1 className="text-white text-3xl sm:text-4xl font-bold tracking-tight">
                 Welcome back
               </h1>
               <p className="text-[#8e8e8e] text-lg font-light">

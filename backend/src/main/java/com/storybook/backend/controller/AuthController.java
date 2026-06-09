@@ -47,4 +47,23 @@ public class AuthController {
         authService.logout(body.get("refreshToken"));
         return ResponseEntity.ok(Map.of("message", "Logged out successfully"));
     }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
+        // Intercept your explicit message string matching line 82
+        if (ex.getMessage() != null && ex.getMessage().contains("Refresh token expired or revoked")) {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED) // Return a clean 401 status code!
+                    .body(Map.of(
+                        "error", "Unauthorized",
+                        "message", "Your session has fully expired. Please log in again."
+                    ));
+        }
+        
+        // Let any other generic system runtime errors default back to a standard 500 error boundary pass
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Internal Server Error", "message", ex.getMessage()));
+    }
+
 }
