@@ -2,10 +2,8 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import useAuthStore from "./store/AuthStore";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
-import EditorPage from "./pages/EditorPage";
 import WorkSpacePage from "./pages/WorkSpacePage";
 
-// import "./App.css";
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useAuthStore();
