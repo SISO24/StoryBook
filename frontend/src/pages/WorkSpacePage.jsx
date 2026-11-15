@@ -486,6 +486,15 @@ export default function WorkspacePage() {
           <div className="flex items-center gap-4">
             {id && !isReadOnly && (
               <button
+                onClick={triggerAudioUpload}
+                className="flex md:hidden items-center gap-1.5 bg-white text-black text-xs font-semibold font-sans px-2.5 py-1 rounded shadow hover:bg-gray-200 transition-all"
+              >
+                <span>🔊</span>
+                <span>Import Audio</span>
+              </button>
+            )}
+            {id && !isReadOnly && (
+              <button
                 onClick={() => setShareModalOpen(true)}
                 className="bg-[#222222] hover:bg-[#2a2a2a] text-gray-300 hover:text-white text-xs font-light tracking-wide px-3 py-1 rounded border border-[#333333] hover:border-[#444444] shadow-sm transition-all flex items-center gap-1.5"
               >
